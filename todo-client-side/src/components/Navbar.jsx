@@ -1,10 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '../providers/AuthProviders';
 import { Link } from 'react-router-dom';
 
 const Navbar = () => {
     const {user }= useContext(AuthContext)
+    const [theme, setTheme] = useState( localStorage.getItem('theme') || window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") 
+
+    useEffect(()=>{
+      if(theme === 'dark'){
+        document.documentElement.classList.add('dark')
+      }
+      else{
+        document.documentElement.classList.remove('dark')
+      }
+      localStorage.setItem('theme', theme)
+    }, [theme])
+
+
+    const toggleTheme = () =>{
+      console.log(theme);
+      setTheme(theme === 'dark' ? 'light' : 'dark')
+    }
 
     return (
         <div>
@@ -43,6 +60,13 @@ const Navbar = () => {
     <Link to={'/signup'}><button className="btn btn-soft">Sign Up</button></Link>
     </>
     }
+    <button onClick={toggleTheme}>
+    <select className="select select-bordered w-full max-w-xs">
+  <option onClick={()=>toggleTheme('system')}>system</option>
+  <option >dark</option>
+  <option >light</option>
+</select>
+    </button>
   </div>
 </div>
         </div>

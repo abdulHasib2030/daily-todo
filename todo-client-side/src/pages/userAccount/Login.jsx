@@ -1,7 +1,39 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import img from '../../assets/login.jpg'
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../providers/AuthProviders';
+import toast from 'react-hot-toast';
 
 const Login = () => {
+    const [error, setError] = useState({})
+    const [loading, setLoading] = useState(false)
+    const { login } = useContext(AuthContext)
+     const navigate = useNavigate()
+
+    const handleLoginUpForm = (e) => {
+        e.preventDefault()
+        const form = e.target;
+        const email = form.email.value;
+        const password = form.password.value;
+        if (!email) return setError({ email: "Email required." })
+        if (!password) return setError({ password: "Password required." })
+        else setError({})
+        setLoading(true)
+        login(email, password)
+            .then((res) => {
+                if(res.user){
+                    navigate('/')
+                    toast.success("Login Successfully.")
+                    setLoading(false)
+                }
+                else  toast.error("Invalid email and password.")
+            })
+            .catch(err => {
+                toast.error("Invalid email and password.")
+                setLoading(false)
+            })
+
+    }
     return (
         <div>
             <div className=" bg-base-200 min-h-screen">
@@ -11,15 +43,30 @@ const Login = () => {
                     </div>
                     <div className=" bg-base-100   md:w-1/2 lg:pt-32">
                         <div className="card-body">
-                        <h1 className="text-5xl font-bold">Login now!</h1>
+                            <h1 className="text-5xl font-bold">Login now</h1>
 
                             <fieldset className="fieldset w-full">
-                                <label className="fieldset-label">Email</label>
-                                <input type="email" className="input w-full" placeholder="Email" />
-                                <label className="fieldset-label">Password</label>
-                                <input type="password" className="input w-full" placeholder="Password" />
-                                <div><a className="link link-hover">Forgot password?</a></div>
-                                <button className="btn btn-neutral mt-4">Login</button>
+                                <form onSubmit={handleLoginUpForm} className='space-y-3 text-lg dark:text-white'>
+
+                                    <label className="fieldset-label">Email</label>
+                                    <input name='email' type="email" className="input w-full" placeholder="Enter your mail" />
+                                    {
+                                        error?.email && <p className='text-red-500'>{error?.email}</p>
+                                    }
+                                    <label className="fieldset-label">Password</label>
+                                    <input name='password' type="password" className="input w-full" placeholder="Password" />
+                                    {
+                                        error?.password && <p className='text-red-500'>{error?.password}</p>
+                                    }
+                                    {/* <div><a className="link link-hover">Forgot password?</a></div> */}
+                                    {
+                                        loading ?
+                                            <button type='submit' className="btn btn-neutral mt-4"><span className="loading loading-spinner loading-lg"></span></button>
+                                            :
+                                            <button type='submit' className="btn btn-neutral mt-4">Login</button>
+                                    }
+                                    <p>Don't have an account <Link to={'/signup'}><span className='link text-blue-500'>Sign Up</span></Link></p>
+                                </form>
                             </fieldset>
                         </div>
                     </div>

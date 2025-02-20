@@ -25,13 +25,24 @@ const client = new MongoClient(uri, {
   }
 });
 
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    app.get('/', async(req, res)=>{
-        const data = {name:"Abdul Hasib",age: 16}
-        res.send(data)
+    // await client.connect();
+    const userCollection = client.db('scic-todo').collection('users')
+
+
+    app.post('/signup', async(req, res)=>{
+        const data = req.body;
+        const findEmail = await userCollection.findOne({email:data.email})
+        if(!findEmail){
+          const result = await userCollection.insertOne(data)
+          res.send(result)
+        }
+        else{
+          res.send({msg: "Already user add"})
+        }
     })
 
   } finally {
