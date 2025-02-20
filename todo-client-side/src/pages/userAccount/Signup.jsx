@@ -8,8 +8,10 @@ import { useState } from 'react';
 import { updateProfile } from 'firebase/auth';
 import { auth } from '../../firebase/firebase';
 import axios from 'axios'
+import { FcGoogle } from "react-icons/fc";
+
 const Signup = () => {
-    const { createUser, user } = useContext(AuthContext)
+    const { createUser, user, google } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState({})
     const navigate = useNavigate()
@@ -63,7 +65,20 @@ const Signup = () => {
 
         })
     }
-    console.log(user);
+    
+  const handleGoogle = () =>{
+    google()
+    .then(res =>{
+       if(res.user){
+        navigate('/')
+        toast.success("Sign Up Successfully.")
+       }
+       else toast.error("Something wrong.")
+    })
+    .catch(err =>{
+        toast.error("Something wrong.")
+    })
+  }
     return (
         <div>
             <div className=" bg-base-200 min-h-screen">
@@ -101,6 +116,8 @@ const Signup = () => {
                                 }
                                 <p>Already have an account <Link to={'/login'}><span className='link text-blue-500'>Login</span></Link></p>
                                 </form>
+                                <div className='divider uppercase'>or</div>
+                                <button onClick={handleGoogle} className='flex cursor-pointer items-center gap-3 text-2xl text-center justify-center border py-2 rounded-lg dark:border-gray-600'><FcGoogle /> Login with Google </button>
                             </fieldset>
                         </div>
                     </div>

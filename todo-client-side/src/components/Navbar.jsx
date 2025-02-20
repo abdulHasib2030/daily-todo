@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from '../providers/AuthProviders';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { auth } from '../firebase/firebase';
 
 const Navbar = () => {
-    const {user }= useContext(AuthContext)
+    const {user, logout }= useContext(AuthContext)
     const [theme, setTheme] = useState( localStorage.getItem('theme') || window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") 
-
+  
     useEffect(()=>{
       if(theme === 'dark'){
         document.documentElement.classList.add('dark')
@@ -23,10 +25,15 @@ const Navbar = () => {
       setTheme(theme === 'dark' ? 'light' : 'dark')
     }
 
+    const logoutUser = () =>{
+      logout()
+      
+    }
+
     return (
-        <div>
-            <div className="navbar bg-base-100 shadow-sm">
-  <div className="flex-1">
+        <div className='border-b dark:border-gray-600 w-full'>
+            <div className="navbar w-11/12 mx-auto ">
+  <div className="flex-1 ">
     <Link to={'/'} className=" text-xl">Daily Todo</Link>
   </div>
   <div className="flex gap-2">
@@ -43,7 +50,7 @@ const Navbar = () => {
       </div>
       <ul
         tabIndex={0}
-        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+        className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
         <li>
           <a className="justify-between">
             Profile
@@ -51,7 +58,7 @@ const Navbar = () => {
           </a>
         </li>
         <li><a>Settings</a></li>
-        <li><a>Logout</a></li>
+        <li onClick={logoutUser}><a>Logout</a></li>
       </ul>
     </div>
     :

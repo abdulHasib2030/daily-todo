@@ -6,6 +6,9 @@ import MainLayout from "../layout/MainLayout";
 import Home from "../pages/Home/Home";
 import Login from "../pages/userAccount/Login";
 import Signup from "../pages/userAccount/Signup";
+import Private from "../providers/Private";
+import Dashboard from "../pages/Dashboard/Dashboard";
+import LogRedirect from "../providers/LogRedirect";
 
 export const router = createBrowserRouter([
     {
@@ -18,11 +21,15 @@ export const router = createBrowserRouter([
             },
             {
                 path:'/login',
-                element: <Login></Login>
+                element: <LogRedirect><Login></Login></LogRedirect>
             },
             {
                 path:'/signup',
-                element: <Signup />
+                element: <LogRedirect><Signup /></LogRedirect>
+            },
+            {
+                path: '/home',
+                element: <Private><Dashboard></Dashboard></Private>
             },
 
         ]

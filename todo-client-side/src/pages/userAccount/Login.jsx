@@ -3,11 +3,12 @@ import img from '../../assets/login.jpg'
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../providers/AuthProviders';
 import toast from 'react-hot-toast';
+import { FcGoogle } from 'react-icons/fc';
 
 const Login = () => {
     const [error, setError] = useState({})
     const [loading, setLoading] = useState(false)
-    const { login } = useContext(AuthContext)
+    const { login, google } = useContext(AuthContext)
      const navigate = useNavigate()
 
     const handleLoginUpForm = (e) => {
@@ -34,6 +35,20 @@ const Login = () => {
             })
 
     }
+
+    const handleGoogle = () =>{
+        google()
+        .then(res =>{
+           if(res.user){
+            navigate('/')
+            toast.success("Sign Up Successfully.")
+           }
+           else toast.error("Something wrong.")
+        })
+        .catch(err =>{
+            toast.error("Something wrong.")
+        })
+      }
     return (
         <div>
             <div className=" bg-base-200 min-h-screen">
@@ -67,6 +82,8 @@ const Login = () => {
                                     }
                                     <p>Don't have an account <Link to={'/signup'}><span className='link text-blue-500'>Sign Up</span></Link></p>
                                 </form>
+                                 <div className='divider uppercase'>or</div>
+                                                                <button onClick={handleGoogle} className='flex cursor-pointer items-center gap-3 text-2xl text-center justify-center border py-2 rounded-lg dark:border-gray-600'><FcGoogle /> Login with Google </button>
                             </fieldset>
                         </div>
                     </div>
