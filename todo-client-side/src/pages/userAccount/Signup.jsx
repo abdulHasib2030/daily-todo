@@ -43,9 +43,14 @@ const Signup = () => {
         createUser(email, password)
         .then(res => {
             if(res.user){
-
-                const res =  axios.post('http://localhost:5000/signup/', {name:name, email:email, userId: user.uid})
-                
+                console.log(res.user.uid);
+                try {
+                    const result =  axios.post('http://localhost:5000/signup', {name:name, email:email, userId: res.user.uid})
+                    console.log(result);
+                } catch (error) {
+                    console.log(error);
+                }
+               
                 updateProfile(auth.currentUser, {
                     displayName: name
                 }).then(()=>{

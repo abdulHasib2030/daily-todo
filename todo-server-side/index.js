@@ -31,10 +31,12 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     const userCollection = client.db('scic-todo').collection('users')
+    const todoCollection = client.db('scic-todo').collection('todo')
 
-
+    // -----------user first regist data store databas ------------------//
     app.post('/signup', async(req, res)=>{
         const data = req.body;
+        console.log(data);
         const findEmail = await userCollection.findOne({email:data.email})
         if(!findEmail){
           const result = await userCollection.insertOne(data)
@@ -44,6 +46,20 @@ async function run() {
           res.send({msg: "Already user add"})
         }
     })
+
+  // -----------user add task store databas ------------------//
+    app.post('/tasks', async(req, res)=>{
+      const data = req.body;
+      const result = await todoCollection.insertOne(data)
+      res.send(result)
+    })
+  // -----------user view task  ------------------//
+app.get('/tasks', async(req, res)=>{
+  const result = await todoCollection.find().toArray()
+  res.send(result)
+})
+
+   
 
   } finally {
     // Ensures that the client will close when you finish/error

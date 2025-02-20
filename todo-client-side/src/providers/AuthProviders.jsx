@@ -15,7 +15,11 @@ const AuthProviders = ({children}) => {
         const subscribe = onAuthStateChanged(auth,( currentuser)=>{
             currentuser ? setUser(currentuser) : setUser(null)
             setLoading(false)
+
         })
+        return ()=>{
+            subscribe()
+        }
     }, [])
 
     const createUser = (email, password) =>{
@@ -35,7 +39,7 @@ const AuthProviders = ({children}) => {
     }
     const authInfo = {
      user,
-     createUser, login, google, loading, logout
+     createUser, login, google,  logout
     }
     return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
 };

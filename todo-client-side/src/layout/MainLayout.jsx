@@ -6,8 +6,8 @@ import { AuthContext } from '../providers/AuthProviders';
 import Loading from '../components/Loading';
 
 const MainLayout = () => {
-    const {loading} = useContext(AuthContext)
-    if(loading) return <Loading></Loading>
+  
+    // if(loading) return <Loading></Loading>
     return (
         <div >
             <Navbar></Navbar>
