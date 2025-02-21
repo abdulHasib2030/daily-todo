@@ -1,170 +1,154 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { format } from "date-fns";
-import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
-import Loading from '../../components/Loading';
-import TaskCard from './TaskCard';
+import React, { useContext, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { io } from "socket.io-client";
-import { AuthContext } from '../../providers/AuthProviders';
-import img from '../../assets/login.jpg'
-const socket = io.connect("http://localhost:5000");
+import { AuthContext } from "../../providers/AuthProviders";
+import { format } from "date-fns";
 import { Button, Modal } from "flowbite-react";
-import toast from 'react-hot-toast';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash } from "react-icons/fa";
+import toast from "react-hot-toast";
+import Swal from "sweetalert2";
+import Loading from "../../components/Loading";
+
+const socket = io("http://localhost:5000");
 
 const Dashboard = () => {
-  const [tasks, setTasks] = useState([]);
+  const queryClient = useQueryClient();
+  const { user } = useContext(AuthContext);
   const [openModal, setOpenModal] = useState(false);
-  const { user } = useContext(AuthContext)
-  
-  // useEffect(() => {
-  //   if (user) {
-  //     axios.get(`http://localhost:5000/tasks?email=${user.email}`).then((res) => setTasks(res.data));
-  //   }
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [update, setUpdate] = useState({
+    id: "",
+    title: "",
+    description: "",
+    category: "",
+  });
 
-  //   // socket.on("task-updated", (newTask) => {
-  //   //   setTasks((prev) => [...prev.filter((task) => task._id !== newTask._id), newTask]);
-  //   // });
-
-  //   // socket.on("task-deleted", (taskId) => {
-  //   //   setTasks((prev) => prev.filter((task) => task._id !== taskId));
-  //   // });
-
-  //   // return () => socket.off();
-  // }, []);
-
- 
-  
-
-  const { data, isLoading , refetch} = useQuery({
-    queryKey: ['todo'],
+  const { data: tasks = [], isLoading, isPending, refetch } = useQuery({
+    queryKey: ["tasks"],
     queryFn: async () => {
-      const res = await axios.get(`${import.meta.env.VITE_URL}/tasks?email=${user.email}`)
-      return res.data
-    }
-  })
- 
+      const { data } = await axios.get(
+        `http://localhost:5000/tasks?email=${user.email}`
+      );
+      return data;
+    },
+  });
 
-  if (isLoading) return <Loading></Loading>
+  const [taskColumns, setTaskColumns] = useState({
+    "To-Do": [],
+    "In Progress": [],
+    "Done": [],
+  });
 
- console.log(data);
-
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const form = e.target;
-    const title = form.title.value;
-    const description = form.description.value;
-    const category = form.category.value;
-
-    if (title.length > 50) return alert("Title must be 50 characters or less");
-    if (description.length > 200) return alert("Description must be 200 characters or less");
-
-    const newTask = {
-      title,
-      description,
-      category,
-      timestamp: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
-      email: user.email
+  useEffect(() => {
+    const groupedTasks = {
+      "To-Do": tasks.filter((task) => task.category === "todo"),
+      "In Progress": tasks.filter((task) => task.category === "inprocess"),
+      "Done": tasks.filter((task) => task.category === "done"),
     };
+    setTaskColumns(groupedTasks);
+  }, [tasks]);
 
-    // ----- add task api call ------//
+  if (isPending || isLoading) return <Loading />;
 
-    refetch()
+  // Handle Drag and Drop
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const { source, destination } = result;
+    const sourceCategory = source.droppableId;
+    const destinationCategory = destination.droppableId;
+
+    // Clone columns
+    const updatedColumns = { ...taskColumns };
+
+    // Remove the task from the source category
+    const movedTask = updatedColumns[sourceCategory].splice(source.index, 1)[0];
+
+    // Update task's category if moved to a different section
+    movedTask.category =
+      destinationCategory === "To-Do"
+        ? "todo"
+        : destinationCategory === "In Progress"
+        ? "inprocess"
+        : "done";
+
+    // Add the task to the new category
+    updatedColumns[destinationCategory].splice(destination.index, 0, movedTask);
+
+    // Update state
+    setTaskColumns(updatedColumns);
+
+    // Update database
     try {
-      const res = axios.post(`${import.meta.env.VITE_URL}/tasks`, newTask)
-      setOpenModal(false)
-      toast.success("Successfully added task.")
-
+      await axios.put(`${import.meta.env.VITE_URL}/tasks/${movedTask._id}`, {
+        category: movedTask.category,
+      });
+      refetch();
+      toast.success("Task updated successfully.");
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to update task.");
     }
-    form.reset()
-  }
-
-
-
+  };
 
   return (
-    <div className='mt-10  '>
-      <div>
-        <div className='text-xl font-semibold flex items-center text-center justify-center gap-10 '>
-          <h4 onClick={() => setOpenModal(true)} className='cursor-pointer hover:border-b hover:text-green-600'>Add Task</h4>
-          <h4 className='cursor-pointer hover:border-b hover:text-green-600'>Reorder Task</h4>
-          <h4></h4>
+    <div className="p-6">
+      <h2 className="text-xl font-bold">Task Manager with Drag & Drop</h2>
+      <button
+        onClick={() => setOpenModal(true)}
+        className="bg-blue-500 text-white px-4 py-2 rounded my-4"
+      >
+        Add Task
+      </button>
+
+      {/* DragDropContext for DnD */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid md:grid-cols-3 gap-5 grid-cols-1">
+          {Object.keys(taskColumns).map((category, idx) => (
+            <Droppable key={idx} droppableId={category}>
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="bg-gray-200 p-4 rounded min-h-[300px]"
+                >
+                  <h3 className="text-lg font-bold">{category}</h3>
+                  {taskColumns[category].map((task, index) => (
+                    <Draggable key={task._id} draggableId={task._id} index={index}>
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="bg-white p-3 my-4 rounded shadow flex justify-between"
+                        >
+                          <div>
+                            <h1 className="text-xl font-semibold">{task.title}</h1>
+                            <p className="text-sm">{task.description}</p>
+                            <p>{format(task.timestamp, "EEEE, MMMM d, yyyy")}</p>
+                          </div>
+                          <div className="space-y-2">
+                            <FaEdit
+                             
+                              className="text-xl cursor-pointer"
+                            />
+                            <FaTrash
+                           
+                              className="text-xl cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ))}
         </div>
-        {/* Task Show */}
-        <div>
-          <h1 className='text-3xl font-semibold mt-5 mb-3'>Your Task</h1>
-          {
-            data?.map((task) => <div key={task._id} className='dark:text-white'>
-                  <h1 className='text-2xl'>{format(task.timestamp,  "EEEE, MMMM d, yyyy")}</h1>
-                  <div className='border-b dark:border-gray-600 '></div>
-                  <div className='py-4 flex items-center justify-between'>
-                      <div>
-                      <h4 className='text-xl font-semibold'>{task.title}</h4>
-                      <p className='text-sm'>{task.description}</p>
-                      </div>
-                      <div className='space-y-2'>
-                          <FaEdit className='text-xl cursor-pointer' />
-                          <FaTrash className='text-xl cursor-pointer'  ></FaTrash>
-                      </div>
-                  </div>
-              </div>
-              )
-          }
-           
-        </div>
-      </div>
-
-      {/* add task modal */}
-
-      <Modal show={openModal} onClose={() => setOpenModal(false)}>
-        <Modal.Header>Create New Task</Modal.Header>
-        <Modal.Body>
-        <form onSubmit={handleSubmit}>
-            <div className='space-y-2'>
-              <h2 className="font-bold text-lg">Create New Task</h2>
-              <label className="label">Title (Max 50 chars)</label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                name='title'
-                maxLength={50}
-                required
-              />
-              <label className="label">Description (Max 200 chars)</label>
-              <textarea
-                className="textarea textarea-bordered w-full"
-                name='description'
-                maxLength={200}
-                required
-              ></textarea>
-              <label className="label">Category</label>
-              <select className="select select-bordered w-full" name='category' >
-                <option value={'todo'}>To-Do</option>
-                <option value={'inprocess'}>In Progress</option>
-                <option value={'done'}>Done</option>
-              </select>
-             
-                   
-                  <button  type='submit'  className="btn btn-success mt-3 px-6">Save</button>
-
-
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          {/* <Button onClick={() => setOpenModal(false)}>I accept</Button> */}
-          <Button color="gray" onClick={() => setOpenModal(false)}>
-            Decline
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-    
-
+      </DragDropContext>
     </div>
   );
 };
