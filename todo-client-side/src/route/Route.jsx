@@ -9,6 +9,7 @@ import Signup from "../pages/userAccount/Signup";
 import Private from "../providers/Private";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import LogRedirect from "../providers/LogRedirect";
+import TaskList from "../pages/Dashboard/TaskList";
 
 export const router = createBrowserRouter([
     {
@@ -29,7 +30,7 @@ export const router = createBrowserRouter([
             },
             {
                 path: '/home',
-                element: <Private><Dashboard></Dashboard></Private>
+                element: <Private><TaskList/></Private>
             },
 
         ]
