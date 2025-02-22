@@ -15,7 +15,7 @@ app.use(express.json())
 const server = http.createServer(app)
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173','https://daily-todo-cd82f.web.app'],
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 })
@@ -47,7 +47,7 @@ async function run() {
 
     app.post('/signup', async (req, res) => {
       const data = req.body;
-      console.log(data);
+   
       const findEmail = await userCollection.findOne({ email: data.email })
       if (!findEmail) {
         const result = await userCollection.insertOne(data)
@@ -74,20 +74,23 @@ async function run() {
         const result = await todoCollection.insertOne(task)
         res.send(result)
       } catch (error) {
-        console.log(length);
+      
       }
-      // io.emit("Task-added", data)
 
-      res.json("Error")
     })
 
     // -----------user view task  ------------------//
     app.get('/tasks', async (req, res) => {
       const email = req.query
-      console.log(email);
+      
+      if (!email){
+        res.status(404).json("Not provided Email")
+        return
+      }
+      else{
       const result = await todoCollection.find(email).sort({ order:1 }).toArray()
-
-      res.send(result)
+      res.send(result)  
+      }
     })
 
     app.put('/tasks/:id', async (req, res) => {
@@ -104,7 +107,7 @@ async function run() {
           }
         }
       )
-      console.log(findData);
+     
 
       res.send(findData)
     })
@@ -117,18 +120,18 @@ async function run() {
 
 
     io.on("connection", (socket) => {
-      console.log("Socket connected:", socket.id);
+      
 
       socket.on("updateTask", async (data) => {
         try {
-          // console.log("Updating task:", data[0].id._id, "New Category:", data[1].id);
+        
 
           // Map category names to database values
           let tempCategory = "";
           if (data[1].id === "In Progress") tempCategory = "inprogress";
           else if (data[1].id === "To-Do") tempCategory = "todo";
           else if (data[1].id === "Done") tempCategory = "done";
-          //  console.log(  data[2], typeof data[2]);
+        
          let order;
           try {
             order = (await todoCollection.find({category:tempCategory}).toArray()).length
@@ -143,10 +146,10 @@ async function run() {
           );
 
           if (result.modifiedCount > 0) {
-            console.log("Task updated successfully!");
+          
             // io.emit("receiveTask", data);
           } else {
-            console.log("No task was updated. Check if the ID is correct.");
+            
           }
         } catch (error) {
           console.error("Error updating task:", error);
@@ -156,13 +159,13 @@ async function run() {
       socket.on('updateOrderTask', async (data) => {
  
         data[0].map( async(item, idx )=> {
-          console.log(item._id);
+         
         const res=  await todoCollection.updateOne({_id: new ObjectId(item._id)}, 
         {
           $set: {order: idx+1}
         })
       })
-      console.log(data);
+    
       
 
 

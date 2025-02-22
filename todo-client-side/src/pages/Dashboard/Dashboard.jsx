@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import Swal from "sweetalert2";
 import Loading from "../../components/Loading";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://daily-todo-server.onrender.com");
 
 const Dashboard = () => {
   const queryClient = useQueryClient();
@@ -29,7 +29,7 @@ const Dashboard = () => {
     queryKey: ["tasks"],
     queryFn: async () => {
       const { data } = await axios.get(
-        `http://localhost:5000/tasks?email=${user.email}`
+        `https://daily-todo-server.onrender.com/tasks?email=${user.email}`
       );
       return data;
     },

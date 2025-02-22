@@ -11,7 +11,7 @@ import Swal from 'sweetalert2'
 import Loading from "../../components/Loading";
 import io from 'socket.io-client'
 
-const socket = io('http://localhost:5000')
+const socket = io('https://daily-todo-server.onrender.com')
 
 import {
   DndContext,
@@ -33,7 +33,7 @@ const TaskList = () => {
   const { user } = useContext(AuthContext)
   const [openModal, setOpenModal] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-  const [update, setUpdate] = useState({id: '',title:'', description:'', category:''})
+  const [update, setUpdate] = useState({ id: '', title: '', description: '', category: '' })
 
   const [taskColumns, setTaskColumns] = useState({
     "To-Do": [],
@@ -42,15 +42,15 @@ const TaskList = () => {
   });
 
 
-  const { data: tasks = [],isLoading,isPending, refetch } = useQuery({
+  const { data: tasks = [], isLoading, isPending, refetch } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const { data } = await axios.get(`http://localhost:5000/tasks`);
+      const { data } = await axios.get(`https://daily-todo-server.onrender.com/tasks?email=${user?.email}`);
       return data;
     }
   });
 
-  
+
   const [taskss, setTaskss] = useState(initialTasks);
 
   useEffect(() => {
@@ -64,10 +64,9 @@ const TaskList = () => {
     setTaskColumns(groupedTasks);
   }, [tasks]);
 
-  console.log(tasks);
- 
 
-console.log(taskColumns);
+
+
 
 
   const handleDragEnd = (event) => {
@@ -76,7 +75,7 @@ console.log(taskColumns);
 
     const sourceCategory = Object.keys(taskColumns).find((key) => taskColumns[key].includes(active.id));
     const targetCategory = over.id;
- 
+
 
     if (sourceCategory && targetCategory) {
       setTaskColumns((prev) => {
@@ -87,8 +86,8 @@ console.log(taskColumns);
         if (sourceCategory === targetCategory) {
           const targetIndex = targetTasks.indexOf(over.id);
           const reorderedTasks = arrayMove(sourceTasks, draggedItemIndex, targetIndex);
-    socket.emit('updateOrderTask', [reorderedTasks, over.id])
-          
+          socket.emit('updateOrderTask', [reorderedTasks, over.id])
+
           return { ...prev, [sourceCategory]: reorderedTasks };
         } else {
           sourceTasks.splice(draggedItemIndex, 1);
@@ -99,10 +98,10 @@ console.log(taskColumns);
 
 
     }
-    // console.log(taskColumns["Done"]);
+
 
     socket.emit('updateTask', [active, over, taskColumns])
-    // console.log(taskss['todo']);
+ 
 
 
   };
@@ -119,7 +118,7 @@ console.log(taskColumns);
   //   return () => socket.off("receive_message");
   // }, []);
 
- if(isPending || isLoading) return <Loading/>
+  if (isPending || isLoading) return <Loading />
   // useEffect(() => {
   //   socket.on("tasksUpdated", (updatedTasks) => {
   //     queryClient.setQueryData(["tasks"], updatedTasks);
@@ -128,7 +127,7 @@ console.log(taskColumns);
   // }, [queryClient]);
 
 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const form = e.target;
     const title = form.title.value;
@@ -149,31 +148,31 @@ console.log(taskColumns);
     // ----- add task api call ------//
 
     try {
-      const res =await axios.post(`${import.meta.env.VITE_URL}/tasks`, newTask)
+      const res = await axios.post(`${import.meta.env.VITE_URL}/tasks`, newTask)
       setOpenModal(false)
       refetch()
       toast.success("Successfully added task.")
 
     } catch (error) {
-      console.log(error);
+    
     }
     form.reset()
   }
 
 
 
-  const updateTask = (id) =>{
-    console.log(id);
-    const singleData = tasks.filter(task=> task._id === id)
-    console.log(singleData[0]);
-    setUpdate({id:id ,title:singleData[0].title, description:singleData[0].description, category:singleData[0].category})
+  const updateTask = (id) => {
+  
+    const singleData = tasks.filter(task => task._id === id)
+  
+    setUpdate({ id: id, title: singleData[0].title, description: singleData[0].description, category: singleData[0].category })
     setOpenUpdateModal(true)
   }
 
-  const handleUpdateSubmit = async (e) =>{
+  const handleUpdateSubmit = async (e) => {
     e.preventDefault()
     const form = e.target;
-    const title  = form.title.value;
+    const title = form.title.value;
     const description = form.description.value;
     const category = form.category.value;
     const updateTask = {
@@ -189,7 +188,7 @@ console.log(taskColumns);
       toast.success("Updated successfully.")
 
       refetch()
-      
+
     } catch (error) {
       setOpenUpdateModal(false)
       toast.error("Something wrong")
@@ -197,7 +196,7 @@ console.log(taskColumns);
 
   }
 
-  const deleteTask= async(id)=>{
+  const deleteTask = async (id) => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -206,17 +205,17 @@ console.log(taskColumns);
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!"
-    }).then(async(result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const res = await axios.delete(`${import.meta.env.VITE_URL}/tasks/${id}`)
-          console.log(res.data);
+       
           refetch()
-         toast.success('Your task has been deleted.')
+          toast.success('Your task has been deleted.')
         } catch (error) {
           toast.error("Something wrong")
         }
-       
+
       }
     });
   }
@@ -224,13 +223,14 @@ console.log(taskColumns);
 
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold">Real-Time Task Board</h2>
-      <button onClick={() => setOpenModal(true)} className="bg-blue-500 text-white px-4 py-2 rounded my-4">
-        Add Task
-      </button>
+    <div className="my-16 pb-32">
+      <h2 className="text-3xl font-bold">Daily Todo - Task Management Made Simple</h2>
 
-{/*      
+      <button onClick={() => setOpenModal(true)} className="inline-flex my-5 w-fit mx-auto h-12 animate-background-shine items-center justify-center rounded-md  border-2 dark:border-[#656fe2] border-[#c0c6fc] dark:bg-[linear-gradient(110deg,#1e2a78,45%,#3749be,55%,#1e2a78)] bg-[linear-gradient(110deg,#3d5af1,45%,#5471ff,55%,#3d5af1)] bg-[length:200%_100%] dark:hover:border-white px-6 font-medium text-white dark:text-white transition-colors focus:outline-none focus:ring-2 dark:focus:ring-gray-400 focus:ring-offset-2 focus:ring-offset-gray-50">
+      Add Task
+    </button>
+
+      {/*      
         <div className="grid md:grid-cols-3 gap-5 grid-cols-1">
           {["To-Do", "In Progress", "Done"].map((category, idx) => <div key={idx}
                  
@@ -260,14 +260,14 @@ console.log(taskColumns);
             
           
         </div> */}
-      <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
-      <div className="flex border gap-4 p-4 bg-red-500">
-        {Object.keys(taskColumns)?.map((category) => (
+      <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}  >
+        <div className="grid md:grid-cols-3 grid-cols-1  border rounded-lg  gap-4 p-4 bg-gray-900">
+          {Object.keys(taskColumns)?.map((category) => (
 
-          <TaskColumn key={category} id={category} title={category} taskss={taskColumns[category]} />
-        ))}
-      </div>
-    </DndContext>
+            <TaskColumn key={category} id={category} title={category} update={updateTask} deleteTa={deleteTask} taskss={taskColumns[category]} />
+          ))}
+        </div>
+      </DndContext>
 
 
       {/* add task modal */}
@@ -339,10 +339,10 @@ console.log(taskColumns);
                 required
               ></textarea>
               <label className="label">Category</label>
-              
+
               <select defaultValue={update.category} className="select select-bordered w-full" name='category' >
                 <option value={'todo'}>To-Do</option>
-                <option value={'inprocess'}>In Progress</option>
+                <option value={'inprogress'}>In Progress</option>
                 <option value={'done'}>Done</option>
               </select>
 
@@ -365,40 +365,61 @@ console.log(taskColumns);
     </div>
   );
 };
-const TaskColumn = ({ id, title, taskss }) => {
- taskss.map(task=> {
-  console.log(task._id);
- })
+const TaskColumn = ({ id, title, update, deleteTa, taskss }) => {
+  taskss.map(task => {
+  
+  })
   const { isOver, setNodeRef } = useDroppable({ id });
   return (
     <div
       ref={setNodeRef}
-      className={`w-1/3 border border-red-4 p-4  rounded ${isOver ? "bg-gray-200" : "bg-white"}`}
+      className={` border border-red-4 p-4  rounded ${isOver ? "bg-gray-200" : "bg-white"}`}
     >
       <h2 className="text-lg  font-bold mb-2 uppercase text-black">{title}</h2>
-      <SortableContext items={taskss} strategy={verticalListSortingStrategy}>
+      <SortableContext items={taskss} strategy={verticalListSortingStrategy} >
         {/* {taskss[0].map((task) => (
           <Task key={task} id={task} />
         ))} */}
         {
-          taskss.map(task=> <Task key={task} id={task}></Task>)
+          taskss.map(task => <Task key={task} update={update} deleteTa={deleteTa} id={task}></Task>)
         }
       </SortableContext>
     </div>
   );
 };
 
-const Task = ({ id }) => {
+const Task = ({ update, deleteTa ,id }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
+ 
   return (
+    <div className="p-2 mb-2 flex   relative text-white  rounded cursor-pointer">
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className="p-2 mb-2 bg-blue-500 text-white  rounded cursor-pointer"
+      className=" w-full block  p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
       style={{ transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined }}
     >
-      {id.title}
+     <div>
+     <h1 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{id.title}</h1>
+      <p className="text-sm font-normal text-gray-700 dark:text-gray-400">{id.description}</p>
+      <p className="font-normal text-gray-700 dark:text-gray-400">{format(id.timestamp, "EEEE, MMMM d, yyyy")}</p>
+
+     </div>
+        </div>
+
+  
+        
+      <div className="space-y-2 absolute right-5 top-8 ">
+        <FaEdit onClick={()=> update(id._id)}
+
+          className="text-xl cursor-pointer"
+        />
+       <button  onClick={()=> deleteTa(id._id)}> <FaTrash
+          className="text-xl cursor-pointer"
+        /></button>
+        </div>  
+    
     </div>
   );
 };

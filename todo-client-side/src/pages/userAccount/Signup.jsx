@@ -43,12 +43,12 @@ const Signup = () => {
         createUser(email, password)
         .then(res => {
             if(res.user){
-                console.log(res.user.uid);
+              
                 try {
-                    const result =  axios.post('http://localhost:5000/signup', {name:name, email:email, userId: res.user.uid})
-                    console.log(result);
+                    const result =  axios.post('https://daily-todo-server.onrender.com/signup', {name:name, email:email, userId: res.user.uid})
+                   
                 } catch (error) {
-                    console.log(error);
+                  
                 }
                
                 updateProfile(auth.currentUser, {
