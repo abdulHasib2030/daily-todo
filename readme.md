@@ -33,7 +33,6 @@ Daily Todo is a simple and efficient task management application that allows use
 - 🔄 Drag-and-drop feature to reorder tasks.
 - 🔥 Real-time task updates with Socket.io.
 - 🎨 Beautiful and responsive UI using TailwindCSS.
-- 🌐 Cloud-based storage with Firebase.
 - 📅 Date selection using React Datepicker.
 - 🚀 Optimized performance with React Query.
 - 🔔 Notifications with React Hot Toast.
@@ -73,5 +72,78 @@ Make sure you have installed:
 
 ### **Clone the repository**
 ```sh
-git clone https://github.com/yourusername/daily-todo.git
+git clone https://github.com/abdulHasib2030/daily-todo.git
 cd daily-todo
+
+```
+### Install dependencies
+```sh
+# Install frontend dependencies
+cd todo-client-side
+npm install
+
+# Install backend dependencies
+cd ../todo-server-side
+npm install
+```
+### Run the application
+```sh
+# Start the frontend
+cd todo-client-side
+npm run dev
+
+# Start the backend
+cd ../todo-server-side
+node index.js
+```
+## 📦 Dependencies
+### Frontend Dependencies
+```sh
+"@dnd-kit/core": "^6.3.1",
+"@dnd-kit/sortable": "^10.0.0",
+"@dnd-kit/utilities": "^3.2.2",
+"@tailwindcss/vite": "^4.0.7",
+"@tanstack/react-query": "^5.66.8",
+"axios": "^1.7.9",
+"date-fns": "^4.1.0",
+"firebase": "^11.3.1",
+"flowbite-react": "^0.10.2",
+"localforage": "^1.10.0",
+"match-sorter": "^8.0.0",
+"react": "^19.0.0",
+"react-datepicker": "^8.1.0",
+"react-dom": "^19.0.0",
+"react-hot-toast": "^2.5.2",
+"react-icons": "^5.5.0",
+"react-router-dom": "^7.2.0",
+"socket.io-client": "^4.8.1",
+"sort-by": "^1.2.0",
+"sweetalert2": "^11.17.2",
+"tailwindcss": "^4.0.7"
+```
+### Backend Dependencies
+```sh
+"cors": "^2.8.5",
+"dotenv": "^16.4.7",
+"express": "^4.21.2",
+"mongodb": "^6.13.0",
+"socket.io": "^4.8.1"
+```
+## 🎯 Usage
+* Open the application.
+* Add tasks to your list.
+* Drag and drop to reorder tasks.
+* Click on a task to edit or delete it.
+
+## ⚙️ Configuration
+-   Environment Variables
+    Create a .env file in the server/ directory and add:
+```sh
+DB_PASS=Your_MongoDB_Password
+DB_NAME=Your_MongoDB_Database_Name
+```
+## 🛠 Troubleshooting
+- If the backend doesn't start, ensure MongoDB is running.
+- If styles are not applied, restart the frontend development server.
+- If API calls fail, check CORS policies and backend logs.
+
