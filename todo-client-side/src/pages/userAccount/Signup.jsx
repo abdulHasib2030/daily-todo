@@ -45,10 +45,10 @@ const Signup = () => {
             if(res.user){
               
                 try {
-                    const result =  axios.post('https://daily-todo-server.onrender.com/signup', {name:name, email:email, userId: res.user.uid})
+                    const result =  axios.post(`${import.meta.env.VITE_URL}/signup`, {name:name, email:email, userId: res.user.uid})
                    
                 } catch (error) {
-                  
+                  return toast.error("Something wrong.")
                 }
                
                 updateProfile(auth.currentUser, {

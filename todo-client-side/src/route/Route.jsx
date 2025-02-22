@@ -7,7 +7,7 @@ import Home from "../pages/Home/Home";
 import Login from "../pages/userAccount/Login";
 import Signup from "../pages/userAccount/Signup";
 import Private from "../providers/Private";
-import Dashboard from "../pages/Dashboard/Dashboard";
+
 import LogRedirect from "../providers/LogRedirect";
 import TaskList from "../pages/Dashboard/TaskList";
 

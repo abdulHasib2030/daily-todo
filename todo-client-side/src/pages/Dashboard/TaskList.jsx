@@ -11,7 +11,7 @@ import Swal from 'sweetalert2'
 import Loading from "../../components/Loading";
 import io from 'socket.io-client'
 
-const socket = io('https://daily-todo-server.onrender.com')
+const socket = io(`${import.meta.env.VITE_URL}`)
 
 import {
   DndContext,
@@ -45,7 +45,7 @@ const TaskList = () => {
   const { data: tasks = [], isLoading, isPending, refetch } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const { data } = await axios.get(`https://daily-todo-server.onrender.com/tasks?email=${user?.email}`);
+      const { data } = await axios.get(`${import.meta.env.VITE_URL}/tasks?email=${user?.email}`);
       return data;
     }
   });
@@ -95,37 +95,13 @@ const TaskList = () => {
           return { ...prev, [sourceCategory]: sourceTasks, [targetCategory]: targetTasks };
         }
       });
-
-
     }
-
-
     socket.emit('updateTask', [active, over, taskColumns])
- 
-
-
   };
 
 
-
-
-
-  // useEffect(() => {
-  //   socket.on("receive_message", (data) => {
-  //     // setMessages((prev) => [...prev, data]);
-  //   });
-
-  //   return () => socket.off("receive_message");
-  // }, []);
-
   if (isPending || isLoading) return <Loading />
-  // useEffect(() => {
-  //   socket.on("tasksUpdated", (updatedTasks) => {
-  //     queryClient.setQueryData(["tasks"], updatedTasks);
-  //   });
-  //   return () => socket.off("tasksUpdated");
-  // }, [queryClient]);
-
+ 
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -230,36 +206,7 @@ const TaskList = () => {
       Add Task
     </button>
 
-      {/*      
-        <div className="grid md:grid-cols-3 gap-5 grid-cols-1">
-          {["To-Do", "In Progress", "Done"].map((category, idx) => <div key={idx}
-                 
-                  className=" bg-gray-200 p-4 rounded"
-                >
-                  <h3 className="text-lg font-bold">{category}</h3>
-                  {taskColumns[category].map((task, index) =>   <div key={index}
-                         
-                          className="bg-white p-3 my-4 rounded shadow flex justify-between"
-                        >
-                          <div >
-                            <h1 className="text-xl font-semibold">  {task.title}</h1>
-                            <p className="text-sm">{task.description}</p>
-                            <p>{format(task.timestamp, "EEEE, MMMM d, yyyy")}</p>
-                          </div>
-                          <div className='space-y-2'>
-                            <FaEdit onClick={()=>updateTask(task._id)} className='text-xl cursor-pointer' />
-                            <FaTrash onClick={()=> deleteTask(task._id)} className='text-xl cursor-pointer'  ></FaTrash>
-                          </div>
-                        </div>
-                    
-                   
-                  )}
-                  
-                </div>
-              )}
-            
-          
-        </div> */}
+
       <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}  >
         <div className="grid md:grid-cols-3 grid-cols-1  border rounded-lg  gap-4 p-4 bg-gray-900">
           {Object.keys(taskColumns)?.map((category) => (
@@ -365,6 +312,7 @@ const TaskList = () => {
     </div>
   );
 };
+
 const TaskColumn = ({ id, title, update, deleteTa, taskss }) => {
   taskss.map(task => {
   
@@ -377,9 +325,7 @@ const TaskColumn = ({ id, title, update, deleteTa, taskss }) => {
     >
       <h2 className="text-lg  font-bold mb-2 uppercase text-black">{title}</h2>
       <SortableContext items={taskss} strategy={verticalListSortingStrategy} >
-        {/* {taskss[0].map((task) => (
-          <Task key={task} id={task} />
-        ))} */}
+       
         {
           taskss.map(task => <Task key={task} update={update} deleteTa={deleteTa} id={task}></Task>)
         }
