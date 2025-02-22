@@ -16,14 +16,12 @@ Daily Todo is a simple and efficient task management application that allows use
 - [Usage](#-usage)
 - [Configuration](#-configuration)
 - [Troubleshooting](#-troubleshooting)
-- [Contributors](#-contributors)
-- [License](#-license)
 
 ---
 
 ## 🚀 Live Demo
 
-🔗 [Live Application](#) _(Replace with the actual deployed link)_
+🔗 [Live Application](https://daily-todo-cd82f.web.app/) 
 
 ---
 
@@ -135,7 +133,7 @@ node index.js
 * Drag and drop to reorder tasks.
 * Click on a task to edit or delete it.
 
-## ⚙️ Configuration
+##  ⚙️ Configuration
 -   Environment Variables
     Create a .env file in the server/ directory and add:
 ```sh
